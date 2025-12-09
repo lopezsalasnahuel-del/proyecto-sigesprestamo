@@ -1,0 +1,217 @@
+<!-- prestamos.html -->
+<div class="container-fluid animate-fade-in">
+
+    <!-- VISTA 1: LISTADO DE PRÉSTAMOS ACTIVOS -->
+    <div id="seccionListaPrestamos">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="text-primary m-0"><i class="fas fa-file-invoice-dollar me-2"></i>Préstamos Activos</h3>
+            <button class="btn btn-primary" onclick="mostrarFormularioPrestamo()">
+                <i class="fas fa-plus me-2"></i>Nuevo Préstamo
+            </button>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Cliente</th>
+                                <th>Monto</th>
+                                <th>Plan</th>
+                                <th>Progreso</th>
+                                <th>Estado</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaPrestamosBody">
+                            <tr>
+                                <td colspan="6" class="text-center p-4 text-muted">No hay préstamos cargados aún.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VISTA 2: NUEVO PRÉSTAMO (SIMULADOR) -->
+    <div id="seccionNuevoPrestamo" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="text-primary m-0">Otorgar Préstamo</h3>
+            <button class="btn btn-outline-secondary btn-sm" onclick="mostrarListaPrestamos()">
+                <i class="fas fa-arrow-left me-2"></i>Cancelar
+            </button>
+        </div>
+
+        <div class="row">
+            <!-- COLUMNA IZQUIERDA: DATOS -->
+            <div class="col-md-5">
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted mb-3">1. Buscar Cliente</h5>
+                        <div class="input-group mb-2">
+                            <input type="number" id="presDniBusqueda" class="form-control"
+                                placeholder="Ingrese DNI del cliente">
+                            <button class="btn btn-outline-primary" type="button" id="btnBuscarClienteDni">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <!-- Aquí mostramos el nombre si lo encuentra -->
+                        <div id="infoClienteEncontrado" class="alert alert-success py-2 mt-2" style="display: none;">
+                            <i class="fas fa-check-circle me-1"></i> <span id="nombreClientePrestamo"
+                                class="fw-bold"></span>
+                            <input type="hidden" id="idClienteSeleccionado"> <!-- ID oculto -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted mb-3">2. Condiciones</h5>
+                        <form id="formSimularPrestamo">
+                            <div class="mb-3">
+                                <label class="form-label small">Monto a Entregar ($)</label>
+                                <input type="number" class="form-control" id="presMonto" required>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small">Interés Total (%)</label>
+                                    <input type="number" class="form-control" id="presTasa" value="">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small">Cuotas</label>
+                                    <input type="number" class="form-control" id="presCuotas" value="">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">Frecuencia</label>
+                                <select class="form-select" id="presFrecuencia">
+                                    <option value="Mensual">Mensual</option>
+                                    <option value="Quincenal">Quincenal</option>
+                                    <option value="Semanal">Semanal</option>
+                                    <option value="Diario">Diario</option>
+                                </select>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-dark" id="btnSimular">
+                                    <i class="fas fa-calculator me-2"></i>Calcular Plan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: SIMULACIÓN -->
+            <div class="col-md-7">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">3. Resumen y Confirmación</h5>
+                        <hr>
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <small class="text-muted">Total a Devolver</small>
+                                <h4 class="text-dark" id="resumenTotal">$0</h4>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">Valor Cuota</small>
+                                <h4 class="text-primary" id="resumenValorCuota">$0</h4>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">Ganancia</small>
+                                <h5 class="text-success" id="resumenGanancia">$0</h5>
+                            </div>
+                        </div>
+
+                        <!-- Tabla de Cuotas Previa -->
+                        <div class="table-responsive border rounded mb-3" style="max-height: 300px; overflow-y: auto;">
+                            <table class="table table-sm table-striped mb-0" style="font-size: 0.9rem;">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Vencimiento</th>
+                                        <th>Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaSimulacionBody">
+                                    <!-- Se llena con JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-grid">
+                            <button class="btn btn-success btn-lg" id="btnConfirmarPrestamo" disabled>
+                                <i class="fas fa-check me-2"></i>Confirmar y Guardar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- VISTA 3: DETALLE DEL PRÉSTAMO Y COBRANZA -->
+    <div id="seccionDetallePrestamo" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="text-primary m-0"><i class="fas fa-money-bill-wave me-2"></i>Gestión de Cobranza</h3>
+            <button class="btn btn-outline-secondary btn-sm" onclick="mostrarListaPrestamos()">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Listado
+            </button>
+        </div>
+
+        <!-- 1. Cabecera con Resumen del Préstamo -->
+        <div class="card bg-primary text-white shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4 border-end border-light">
+                        <small class="text-white-50">Cliente</small>
+                        <h4 class="mb-0" id="detClienteNombre">Cargando...</h4>
+                        <small id="detClienteDni">DNI: ...</small>
+                    </div>
+                    <div class="col-md-4 border-end border-light text-center">
+                        <small class="text-white-50">Saldo Pendiente</small>
+                        <h2 class="mb-0 fw-bold" id="detSaldoPendiente">$0.00</h2>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <small class="text-white-50">Progreso de Pago</small>
+                        <h4 class="mb-0" id="detProgresoTexto">0/0 Cuotas</h4>
+                        <div class="progress mt-2" style="height: 6px;">
+                            <div id="detBarraProgreso" class="progress-bar bg-warning" role="progressbar"
+                                style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Tabla de Cuotas -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h5 class="m-0 text-muted"><i class="fas fa-list-ol me-2"></i>Listado de Cuotas</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">#</th>
+                                <th>Vencimiento</th>
+                                <th>Monto Cuota</th>
+                                <th>Estado</th>
+                                <th>Fecha de Pago</th>
+                                <th class="text-end pe-4">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaCuotasBody">
+                            <!-- JS llenará esto -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input oculto para saber qué préstamo estamos mirando -->
+        <input type="hidden" id="idPrestamoActivo">
+    </div>
+</div>

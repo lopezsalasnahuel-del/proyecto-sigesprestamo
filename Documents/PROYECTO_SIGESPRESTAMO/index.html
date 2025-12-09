@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Préstamos</title>
+
+    <!-- 1. BOOTSTRAP 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- 2. ICONOS FONTAWESOME -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- 3. MI ESTILO PERSONALIZADO (Aquí vinculamos tu archivo) -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- PANTALLA DE LOGIN -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <h3 class="mb-3 text-primary"><i class="fas fa-hand-holding-usd"></i> SIGES-PRESTAMOS</h3>
+            <p class="text-muted mb-4">Sistema de Gestión de Créditos</p>
+            <button id="btnLogin" class="btn btn-primary btn-lg w-100 shadow-sm">
+                <i class="fab fa-google me-2"></i> Iniciar sesión con Google
+            </button>
+        </div>
+    </div>
+
+    <!-- PANTALLA DE CARGA (SPINNER) -->
+    <div id="loadingScreen" style="display: none;">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+            <p class="mt-2 text-muted">Cargando sistema...</p>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL DE LA APP -->
+    <div id="appContainer">
+
+        <!-- HEADER SUPERIOR -->
+        <header class="d-flex justify-content-between align-items-center p-3 shadow-sm bg-white">
+            <h4 class="m-0 text-dark" id="pageTitle"><i class="fas fa-home me-2"></i>Inicio</h4>
+            <div class="user-info">
+                <span class="badge bg-light text-dark border me-2" id="userEmailDisplay">usuario@email.com</span>
+                <span class="badge bg-primary" id="userRoleDisplay">Rol</span>
+            </div>
+        </header>
+
+        <div class="main-wrapper">
+            <!-- MENÚ LATERAL (SIDEBAR) -->
+            <!-- MENÚ LATERAL (SIDEBAR) -->
+                <nav class="sidebar">
+                    <div class="d-flex flex-column h-100">
+                        
+                        <h4>SIGES</h4>
+                        <hr>
+
+                        <!-- CONTENEDOR DE LA LISTA DE NAVEGACIÓN (SE ESTIRA) -->
+                        <ul class="nav flex-column flex-grow-1 overflow-auto"> 
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#" onclick="cargarPagina('inicio')">
+                                    <i class="fas fa-chart-line fa-fw me-2"></i>Inicio
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="cargarPagina('clientes')">
+                                    <i class="fas fa-users fa-fw me-2"></i>Clientes
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="cargarPagina('prestamos')">
+                                    <i class="fas fa-file-invoice-dollar fa-fw me-2"></i>Préstamos
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="cargarPagina('caja')">
+                                    <i class="fas fa-cash-register fa-fw me-2"></i>Caja
+                                </a>
+                            </li>
+
+                            <li class="nav-item admin-feature" style= "display:none;">
+                                <a class="nav-link" href="#" onclick="cargarPagina('usuarios')">
+                                    <i class="fas fa-users-cog fa-fw me-2"></i>Usuarios
+                                </a>
+                            </li>
+                            <li class="nav-item admin-feature">
+                                <a class="nav-link" href="#" onclick="cargarPagina('mora')">
+                                    <i class="fas fa-users-cog fa-fw me-2"></i>Mora
+                                </a>
+                            </li>
+                            <li class="nav-item admin-feature"style= "display:none;">
+                                <a class="nav-link" href="#" onclick="cargarPagina('configuracion')">
+                                    <i class="fas fa-cogs fa-fw me-2"></i>Configuración
+                                </a>
+                            </li>
+                        </ul>
+
+                        <!-- CONTENEDOR DEL BOTÓN DE SALIR (SE PEGA ABAJO) -->
+                        <div class="mt-auto p-3 border-top border-white border-opacity-25">
+                            <button id="btnLogout" class="btn btn-outline-light w-100 btn-sm">
+                                <i class="fas fa-sign-out-alt me-2"></i>Salir
+                            </button>
+                        </div>
+
+                    </div>
+                </nav>
+
+            <!-- ÁREA DONDE SE CARGAN LOS FORMULARIOS Y TABLAS -->
+            <main id="contentArea">
+                <!-- Aquí inyectaremos el HTML con JavaScript -->
+                <div class="alert alert-info">Bienvenido al sistema. Selecciona una opción del menú.</div>
+            </main>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="text-end p-2 px-4">
+            <small>Sistema de Préstamos v1.0 &copy; 2024</small>
+        </footer>
+    </div>
+
+    <script type="importmap">
+    {
+    "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
+    }
+    }
+    </script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- IMPORTANTE: Tu archivo JavaScript principal -->
+    <script type="module" src="app.js"></script>
+
+</body>
+
+</html>

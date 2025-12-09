@@ -1,0 +1,151 @@
+<!-- clientes.html -->
+<div class="container-fluid animate-fade-in">
+    
+    <!-- ==========================================
+         VISTA 1: LISTADO DE CLIENTES (TABLA)
+         ========================================== -->
+    <div id="seccionLista">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="text-primary m-0"><i class="fas fa-users me-2"></i>Cartera de Clientes</h3>
+            <button class="btn btn-primary" onclick="mostrarFormulario()">
+                <i class="fas fa-plus me-2"></i>Nuevo Cliente
+            </button>
+        </div>
+
+        <!-- Barra de Busqueda -->
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-body p-2">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-0"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" id="buscadorCliente" class="form-control border-0 shadow-none" placeholder="Buscar por Nombre o DNI...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Cliente</th>
+                                <th>DNI</th>
+                                <th>Fuerza / Destino</th>
+                                <th>Contacto</th>
+                                <th>Estado</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaClientesBody">
+                            <!-- Aquí se llenará con JS -->
+                            <tr><td colspan="6" class="text-center p-4">Cargando datos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         VISTA 2: FORMULARIO (CREAR / EDITAR)
+         ========================================== -->
+    <div id="seccionFormulario" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="text-primary m-0" id="tituloFormulario">Nuevo Cliente</h3>
+            <button class="btn btn-outline-secondary btn-sm" onclick="mostrarLista()">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Listado
+            </button>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form id="formNuevoCliente">
+                    <!-- Input oculto para saber si estamos editando -->
+                    <input type="hidden" id="esEdicion" value="false">
+
+                    <!-- SECCIÓN 1: DATOS PERSONALES -->
+                    <h5 class="text-muted mb-3 fs-6 fw-bold text-uppercase">Datos Personales</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-2">
+                            <label class="form-label small">DNI *</label>
+                            <input type="number" class="form-control" id="cliDni" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Apellido y Nombre *</label>
+                            <input type="text" class="form-control" id="cliNombre" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Teléfono</label>
+                            <input type="text" class="form-control" id="cliTelefono">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Email</label>
+                            <input type="email" class="form-control" id="cliEmail">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small">Dirección</label>
+                            <input type="text" class="form-control" id="cliDireccion">
+                        </div>
+                    </div>
+
+                    <hr class="text-muted opacity-25">
+
+                    <!-- SECCIÓN 2: DATOS LABORALES -->
+                    <h5 class="text-muted mb-3 fs-6 fw-bold text-uppercase">Datos Laborales</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <label class="form-label small">Fuerza</label>
+                            <select class="form-select" id="cliFuerza">
+                                <option value="Policia">Policía</option>
+                                <option value="Servicio Penitenciario">Servicio Penitenciario</option>
+                                <option value="Docente">Docente</option>
+                                <option value="Salud">Salud Pública</option>
+                                <option value="Privado">Privado</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Grado / Cargo</label>
+                            <input type="text" class="form-control" id="cliGrado">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Destino</label>
+                            <input type="text" class="form-control" id="cliDestino">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Categoría</label>
+                            <input type="text" class="form-control" id="cliCategoria">
+                        </div>
+                    </div>
+
+                    <hr class="text-muted opacity-25">
+
+                    <!-- SECCIÓN 3: DATOS BANCARIOS -->
+                    <h5 class="text-muted mb-3 fs-6 fw-bold text-uppercase">Datos Bancarios</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label small">Banco</label>
+                            <input type="text" class="form-control" id="cliBanco">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">CBU</label>
+                            <input type="text" class="form-control" id="cliCbu">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Alias</label>
+                            <input type="text" class="form-control" id="cliAlias">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <button type="button" class="btn btn-light me-2" onclick="mostrarLista()">Cancelar</button>
+                        <button type="submit" class="btn btn-success px-4" id="btnGuardarCliente">
+                            <i class="fas fa-save me-2"></i>Guardar Datos
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

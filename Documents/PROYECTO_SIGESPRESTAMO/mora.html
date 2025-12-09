@@ -1,0 +1,52 @@
+<div class="container-fluid animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="text-danger m-0"><i class="fas fa-exclamation-triangle me-2"></i>Reporte de Mora y Atrasos</h3>
+        <button class="btn btn-outline-danger" onclick="loadMoraReport()">
+            <i class="fas fa-sync-alt me-1"></i>Actualizar Reporte
+        </button>
+    </div>
+
+    <!-- TARJETA ROJA DE TOTALES -->
+    <div class="card bg-danger text-white shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6 border-end border-light">
+                    <small class="text-white-50">Clientes en Mora</small>
+                    <!-- IMPORTANTE: Aquí estaba el error, faltaba este ID -->
+                    <h2 class="mb-0 fw-bold" id="totalCuotasMora">0</h2> 
+                </div>
+                <div class="col-md-6 text-end">
+                    <small class="text-white-50">Monto Total Pendiente</small>
+                    <!-- IMPORTANTE: Y aquí faltaba este otro ID -->
+                    <h2 class="mb-0 fw-bold" id="totalMora">$0.00</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA DE MORA -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="m-0 text-muted">Cuotas Vencidas (Pendientes de Pago)</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Cliente</th>
+                            <th>DNI / Teléfono</th>
+                            <th>Monto Cuota</th>
+                            <th>Vencimiento</th>
+                            <th>Días de Atraso</th>
+                            <th class="text-end pe-4">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaMoraBody">
+                        <!-- El JS llenará esto -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

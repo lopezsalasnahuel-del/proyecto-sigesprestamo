@@ -1,0 +1,66 @@
+<!-- usuarios.html -->
+<div class="container-fluid animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="text-primary m-0"><i class="fas fa-user-shield me-2"></i>Gestión de Usuarios y Agentes</h3>
+    </div>
+
+    <!-- SECCIÓN DE REGISTRO -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="m-0 text-muted">Añadir Nuevo Agente</h5>
+        </div>
+        <div class="card-body">
+            <form id="formNuevoUsuario" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label small">Email del Agente *</label>
+                    <input type="email" class="form-control" id="userEmail" required placeholder="ejemplo@dominio.com">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Nombre Completo</label>
+                    <input type="text" class="form-control" id="userNombre" placeholder="Ej: Juan Cobrador">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Rol de Acceso *</label>
+                    <select class="form-select" id="userRol" required>
+                        <option value="empleado">Empleado (Cobrador)</option>
+                        <option value="admin">Administrador (Total)</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100" id="btnGuardarUsuario">
+                        <i class="fas fa-plus me-2"></i>Añadir
+                    </button>
+                </div>
+            </form>
+            <div id="userMessage" class="mt-3"></div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN DE LISTADO -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between">
+            <h5 class="m-0 text-muted">Agentes Registrados</h5>
+            <button class="btn btn-sm btn-outline-primary" onclick="loadUserTable()">
+                <i class="fas fa-sync-alt me-1"></i> Recargar
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Email / ID</th>
+                            <th>Nombre</th>
+                            <th>Rol</th>
+                            <th>Fecha Alta</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <tr><td colspan="5" class="text-center p-4">Cargando usuarios...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

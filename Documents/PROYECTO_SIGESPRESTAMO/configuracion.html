@@ -1,0 +1,37 @@
+<div class="container-fluid animate-fade-in">
+    <h3 class="text-primary mb-4"><i class="fas fa-cogs me-2"></i>Configuración del Sistema</h3>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 text-muted">Valores por Defecto para Préstamos</h6>
+                </div>
+                <div class="card-body">
+                    <form id="formConfig">
+                        <div class="mb-3">
+                            <label class="form-label">Tasa de Interés Mensual Sugerida (%)</label>
+                            <input type="number" id="confTasa" class="form-control" placeholder="Ej: 30">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Cantidad de Cuotas Sugerida</label>
+                            <input type="number" id="confCuotas" class="form-control" placeholder="Ej: 6">
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary" id="btnGuardarConfig">
+                                <i class="fas fa-save me-2"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Nota:</strong> Estos valores se cargarán automáticamente cuando inicies un "Nuevo Préstamo", pero podrás modificarlos en el momento.
+            </div>
+        </div>
+    </div>
+</div>

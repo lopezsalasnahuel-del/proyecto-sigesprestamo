@@ -1,0 +1,184 @@
+/* =========================================
+   CONFIGURACIÓN GENERAL
+   ========================================= */
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa; /* Fondo gris muy suave */
+}
+
+/* =========================================
+   PANTALLAS DE ESTADO (LOGIN / CARGA)
+   ========================================= */
+#loginScreen,
+#loadingScreen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #ffffff;
+}
+
+#loginScreen {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.login-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+}
+
+/* =========================================
+   LAYOUT PRINCIPAL (CONTENEDOR APP)
+   ========================================= */
+#appContainer {
+    display: none; /* Se oculta hasta hacer login */
+    flex-direction: column;
+    height: 100vh;
+}
+
+.main-wrapper {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden; /* Evita scroll en todo el cuerpo */
+}
+
+/* =========================================
+   BARRA LATERAL (SIDEBAR) - CORRECCIONES CLAVE
+   ========================================= */
+.sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    background-color: #0A3D62;
+    color: white;
+    
+    /* === CORRECCIÓN FLEXBOX PARA FORZAR EL STRETCH === */
+    display: flex; 
+    flex-direction: column; 
+    /* La altura de 100vh debe ir en un padre, pero la dejamos para asegurar compatibilidad */
+    height: 100vh; 
+    /* ================================================================ */
+
+    transition: all 0.3s;
+}
+
+.sidebar h4 {
+    padding: 1.5rem 1rem 0.5rem;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.sidebar hr {
+    margin: 0 1rem 1rem;
+    border-color: rgba(255,255,255,0.2);
+}
+
+/* === REGLAS PARA LA LISTA DEL MENÚ (ul.nav) === */
+.sidebar ul.nav {
+    flex-grow: 1; /* Ocupa todo el espacio disponible */
+    overflow-y: auto; /* Permite scroll solo en la lista si es muy larga */
+    padding-bottom: 10px;
+}
+
+.sidebar .nav-link {
+    color: rgba(255,255,255,0.8) !important;
+    padding: 0.8rem 1.5rem;
+    transition: all 0.2s;
+    border-radius: 0 25px 25px 0; /* Borde redondeado a la derecha */
+    margin-right: 10px;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: white !important;
+    padding-left: 1.8rem; /* Efecto de movimiento */
+}
+
+.sidebar .nav-link.active {
+    background-color: #1A5276; /* Azul más claro para activo */
+    color: white !important;
+    font-weight: bold;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+}
+
+.sidebar .nav-item {
+    margin-bottom: 5px;
+    display: block; /* Aseguramos que los LI se comporten como bloque */
+}
+
+/* === REGLAS PARA EL BOTÓN DE SALIR === */
+/* Eliminamos el .mt-auto del css ya que lo pusimos en el div del HTML */
+.sidebar > div:last-child { /* Seleccionamos el último div de la sidebar (botón salir) */
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding: 1rem;
+}
+
+
+/* =========================================
+   ÁREA DE CONTENIDO
+   ========================================= */
+#contentArea {
+    flex-grow: 1;
+    padding: 25px;
+    overflow-y: auto; /* Scroll solo aquí */
+    background-color: #f4f6f9;
+}
+
+header {
+    background-color: white;
+    border-bottom: 1px solid #dee2e6;
+    z-index: 10;
+}
+
+footer {
+    background-color: #343a40;
+    color: #adb5bd;
+    font-size: 0.85rem;
+}
+
+/* =========================================
+   UTILIDADES Y EXTRAS
+   ========================================= */
+.card {
+    border: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}
+
+/* Pequeña animación para las tarjetas */
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* Elementos ocultos para admin */
+/*.admin-feature {
+    display: none !important; /* Mantenemos el !important por si acaso */
+/*}
+
+/* =========================================
+   IMPRESIÓN (PDF)
+   ========================================= */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    .printable, .printable * {
+        visibility: visible;
+    }
+    
+    .printable {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white;
+    }
+}
