@@ -1,91 +1,117 @@
 <div class="container-fluid animate-fade-in">
     <h3 class="text-primary mb-4"><i class="fas fa-chart-pie me-2"></i>Resumen General</h3>
 
-    <!-- FILA DE TARJETAS (KPIs) -->
-    <div class="row g-3 mb-4">
+    <!-- 1. KPIs (Tarjetas de Indicadores) -->
+    <!-- Usamos justify-content-center para que si sobran espacios queden centradas -->
+    <div class="row g-3 mb-4 justify-content-center">
+        
         <!-- 1. Clientes -->
-        <div class="col-md-3">
+        <div class="col-md"> <!-- col-md automático ajusta el ancho -->
             <div class="card bg-primary text-white shadow-sm h-100 border-0">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-white-50">Clientes Registrados</h6>
-                        <h2 class="fw-bold mb-0" id="dashTotalClientes">0</h2>
+                        <h6 class="text-white-50">Clientes</h6>
+                        <h2 class="fw-bold mb-0" id="dashTotalClientes">...</h2>
                     </div>
-                    <i class="fas fa-users fa-3x opacity-25"></i>
+                    <i class="fas fa-users fa-2x opacity-25"></i>
                 </div>
             </div>
         </div>
 
         <!-- 2. Préstamos Activos -->
-        <div class="col-md-3">
+        <div class="col-md">
             <div class="card bg-info text-white shadow-sm h-100 border-0">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-white-50">Préstamos Activos</h6>
-                        <h2 class="fw-bold mb-0" id="dashTotalPrestamos">0</h2>
+                        <h6 class="text-white-50">Activos</h6>
+                        <h2 class="fw-bold mb-0" id="dashTotalPrestamos">...</h2>
                     </div>
-                    <i class="fas fa-file-invoice-dollar fa-3x opacity-25"></i>
+                    <i class="fas fa-file-invoice-dollar fa-2x opacity-25"></i>
                 </div>
             </div>
         </div>
 
         <!-- 3. Caja Hoy -->
-        <div class="col-md-3">
+        <div class="col-md">
             <div class="card bg-success text-white shadow-sm h-100 border-0">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-white-50">Balance Caja (Hoy)</h6>
-                        <h2 class="fw-bold mb-0" id="dashBalanceHoy">$0</h2>
+                        <h6 class="text-white-50">Caja Hoy</h6>
+                        <h2 class="fw-bold mb-0" id="dashBalanceHoy">...</h2>
                     </div>
-                    <i class="fas fa-cash-register fa-3x opacity-25"></i>
+                    <i class="fas fa-cash-register fa-2x opacity-25"></i>
                 </div>
             </div>
         </div>
 
-        <!-- 4. Mora (Alerta) -->
-        <div class="col-md-3">
+        <!-- 4. Mora -->
+        <div class="col-md">
             <div class="card bg-danger text-white shadow-sm h-100 border-0">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-white-50">Cuotas Vencidas</h6>
-                        <h2 class="fw-bold mb-0" id="dashTotalMora">0</h2>
+                        <h6 class="text-white-50">Mora</h6>
+                        <h2 class="fw-bold mb-0" id="dashTotalMora">...</h2>
                     </div>
-                    <i class="fas fa-exclamation-triangle fa-3x opacity-25"></i>
+                    <i class="fas fa-exclamation-triangle fa-2x opacity-25"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. NUEVA TARJETA: A Cobrar este Mes -->
+        <div class="col-md">
+            <div class="card text-white shadow-sm h-100 border-0" style="background-color: #6610f2;">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">Proyección Mes</h6>
+                        <h2 class="fw-bold mb-0" id="dashProyeccionMes">...</h2>
+                    </div>
+                    <i class="fas fa-calendar-check fa-2x opacity-25"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ACCESOS RÁPIDOS -->
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3">
-                    <h6 class="m-0 fw-bold text-primary">Acciones Rápidas</h6>
+    <!-- 2. SECCIÓN: GRÁFICOS -->
+    <div class="row mb-4">
+        <!-- Gráfico de Barras: Ingresos -->
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white">
+                    <h6 class="m-0 fw-bold text-secondary">Evolución de Ingresos</h6>
                 </div>
                 <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-outline-primary text-start" onclick="cargarPagina('prestamos')">
-                            <i class="fas fa-plus-circle me-2"></i>Otorgar Nuevo Préstamo
-                        </button>
-                        <button class="btn btn-outline-success text-start" onclick="cargarPagina('clientes')">
-                            <i class="fas fa-user-plus me-2"></i>Registrar Nuevo Cliente
-                        </button>
-                        <button class="btn btn-outline-danger text-start" onclick="cargarPagina('mora')">
-                            <i class="fas fa-search-dollar me-2"></i>Revisar Morosos
-                        </button>
-                    </div>
+                    <canvas id="chartIngresos"></canvas>
                 </div>
             </div>
         </div>
-        
-        <div class="col-md-6">
+
+        <!-- Gráfico de Dona: Estado de Cartera -->
+        <div class="col-md-4">
             <div class="card shadow-sm border-0 h-100">
-                <div class="card-body d-flex align-items-center justify-content-center text-center text-muted">
-                    <div>
-                        <i class="fas fa-chart-bar fa-3x mb-3 text-secondary opacity-25"></i>
-                        <p>Próximamente: Gráfico de Ganancias Mensuales</p>
-                    </div>
+                <div class="card-header bg-white">
+                    <h6 class="m-0 fw-bold text-secondary">Estado de Cartera Total</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartCartera"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Accesos Rápidos -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body d-flex gap-3">
+                    <button class="btn btn-outline-primary flex-fill" onclick="cargarPagina('prestamos')">
+                        <i class="fas fa-plus-circle me-2"></i>Nuevo Préstamo
+                    </button>
+                    <button class="btn btn-outline-success flex-fill" onclick="cargarPagina('clientes')">
+                        <i class="fas fa-user-plus me-2"></i>Nuevo Cliente
+                    </button>
+                    <button class="btn btn-outline-danger flex-fill" onclick="cargarPagina('mora')">
+                        <i class="fas fa-search-dollar me-2"></i>Ver Mora
+                    </button>
                 </div>
             </div>
         </div>

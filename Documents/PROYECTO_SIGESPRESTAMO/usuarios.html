@@ -1,65 +1,190 @@
-<!-- usuarios.html -->
 <div class="container-fluid animate-fade-in">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="text-primary m-0"><i class="fas fa-user-shield me-2"></i>Gestión de Usuarios y Agentes</h3>
+        <h3 class="text-primary m-0"><i class="fas fa-user-tie me-2"></i>Gestión de Equipo</h3>
     </div>
 
     <!-- SECCIÓN DE REGISTRO -->
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-header bg-white py-3">
-            <h5 class="m-0 text-muted">Añadir Nuevo Agente</h5>
+            <h5 class="m-0 text-muted">Datos del Colaborador</h5>
         </div>
         <div class="card-body">
-            <form id="formNuevoUsuario" class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label small">Email del Agente *</label>
-                    <input type="email" class="form-control" id="userEmail" required placeholder="ejemplo@dominio.com">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small">Nombre Completo</label>
-                    <input type="text" class="form-control" id="userNombre" placeholder="Ej: Juan Cobrador">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small">Rol de Acceso *</label>
-                    <select class="form-select" id="userRol" required>
-                        <option value="empleado">Empleado (Cobrador)</option>
-                        <option value="admin">Administrador (Total)</option>
-                    </select>
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-success w-100" id="btnGuardarUsuario">
-                        <i class="fas fa-plus me-2"></i>Añadir
+            <form id="formNuevoUsuario">
+                <div class="row g-3">
+                    <!-- Fila 1 -->
+                    <div class="col-md-4">
+                        <label class="form-label small">Email (ID de Acceso) *</label>
+                        <input type="email" class="form-control" id="userEmail" required placeholder="usuario@gmail.com">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">Nombre y Apellido *</label>
+                        <input type="text" class="form-control" id="userNombre" required placeholder="Ej: Juan Perez">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">DNI *</label>
+                        <input type="number" class="form-control" id="userDni" required>
+                    </div>
+
+                    <!-- Fila 2 -->
+                    <div class="col-md-3">
+                        <label class="form-label small">Rol de Sistema</label>
+                        <select class="form-select" id="userRol" required>
+                            <option value="empleado">Empleado (Cobrador)</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">Zona de Trabajo</label>
+                        <select class="form-select" id="userZona" required>
+                            <option value="Norte">Zona Norte</option>
+                            <option value="Sur">Zona Sur</option>
+                            <option value="Oeste">Zona Oeste</option>
+                            <option value="Otra">Otra Provincia</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">Teléfono</label>
+                        <input type="text" class="form-control" id="userTelefono">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">Dirección</label>
+                        <input type="text" class="form-control" id="userDireccion">
+                    </div>
+                    <hr class="text-muted opacity-25">
+                    <h6 class="text-primary"><i class="fas fa-wallet me-2"></i>Billetera / Límites de Crédito</h6>
+
+                    <div class="card bg-light border-0 mb-3">
+                        <div class="card-body p-3">
+                            <div class="row g-2 align-items-end">
+                                <!-- Selector de Moneda -->
+                                <div class="col-md-3">
+                                    <label class="form-label small">Moneda</label>
+                                    <select class="form-select" id="addMonedaSelector" onchange="toggleCustomCurrency()">
+                                        <option value="ARS">ARS (Pesos)</option>
+                                        <option value="USD">USD (Dólares)</option>
+                                        <option value="EUR">EUR (Euros)</option>
+                                        <option value="OTRO" class="fw-bold">✏️ OTRA...</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Input para escribir la moneda si elige OTRO -->
+                                <div class="col-md-3" id="divOtraMoneda" style="display: none;">
+                                    <label class="form-label small">Nombre Moneda</label>
+                                    <input type="text" class="form-control" id="addMonedaCustom" placeholder="Ej: REALES">
+                                </div>
+
+                                <!-- Monto -->
+                                <div class="col-md-4">
+                                    <label class="form-label small">Monto Límite</label>
+                                    <input type="number" class="form-control" id="addMontoLimite" placeholder="0">
+                                </div>
+
+                                <!-- Botón Agregar -->
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-outline-primary w-100" onclick="agregarLimiteALista()">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aquí se mostrarán los límites agregados -->
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Moneda</th>
+                                    <th>Límite Asignado</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaLimitesBody">
+                                <!-- JS llenará esto -->
+                            </tbody>
+                        </table>
+                        <small class="text-muted">* Si la lista está vacía, el usuario no podrá dar préstamos.</small>
+                    </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <button type="submit" class="btn btn-success px-5" id="btnGuardarUsuario">
+                        <i class="fas fa-save me-2"></i>Guardar Agente
                     </button>
                 </div>
             </form>
-            <div id="userMessage" class="mt-3"></div>
         </div>
     </div>
 
     <!-- SECCIÓN DE LISTADO -->
     <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3 d-flex justify-content-between">
-            <h5 class="m-0 text-muted">Agentes Registrados</h5>
-            <button class="btn btn-sm btn-outline-primary" onclick="loadUserTable()">
-                <i class="fas fa-sync-alt me-1"></i> Recargar
-            </button>
-        </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-striped align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th class="ps-4">Email / ID</th>
-                            <th>Nombre</th>
+                            <th class="ps-4">Agente</th>
+                            <th>Contacto</th>
+                            <th>Zona</th>
                             <th>Rol</th>
-                            <th>Fecha Alta</th>
                             <th class="text-end pe-4">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="userTableBody">
-                        <tr><td colspan="5" class="text-center p-4">Cargando usuarios...</td></tr>
+                        <tr><td colspan="5" class="text-center p-4">Cargando equipo...</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL FICHA DE EMPLEADO (LIMPIO Y CORREGIDO) -->
+    <div class="modal fade" id="modalFichaUsuario" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- 1. HEADER LIMPIO Y ÚNICO -->
+                <div class="modal-header bg-primary text-white">
+                    <!-- Solo un título para que el JS lo llene -->
+                    <h5 class="modal-title" id="tituloFichaUsuario">Ficha: [Nombre del Agente]</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <!-- KPIs Superiores -->
+                    <div class="row text-center mb-4">
+                        <div class="col-6 border-end">
+                            <h6 class="text-muted">Total Préstamos Otorgados</h6>
+                            <h2 class="fw-bold" id="fichaTotalPrestamos">0</h2>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-muted">Cartera de Clientes</h6>
+                            <h2 class="fw-bold" id="fichaTotalClientes">0</h2>
+                        </div>
+                    </div>
+                    
+                    <h6 class="border-bottom pb-2 mb-3">Estado del Crédito (Mes Actual)</h6>
+                    
+                    <!-- Tabla de Límites -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered text-center align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Moneda</th>
+                                    <th>Límite Asignado</th>
+                                    <th class="text-primary">Prestado (Salida)</th>
+                                    <th>Disponible</th>
+                                    <th class="bg-warning bg-opacity-10 text-dark border-start">🎯 A Cobrar (Mes)</th> 
+                                </tr>
+                            </thead>
+                            <tbody id="tablaFichaLimites">
+                                <!-- JS llena esto -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 2. FOOTER (Cierre simple con data-bs-dismiss) -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar Ficha</button>
+                </div>
             </div>
         </div>
     </div>

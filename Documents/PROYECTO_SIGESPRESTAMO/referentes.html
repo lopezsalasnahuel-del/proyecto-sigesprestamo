@@ -1,0 +1,41 @@
+<div class="container-fluid animate-fade-in">
+    <h3 class="text-primary mb-4"><i class="fas fa-handshake me-2"></i>Gestión de Referentes Externos</h3>
+
+    <!-- Formulario Alta -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="text-muted mb-3">Nuevo Referente</h5>
+            <form id="formNuevoReferente" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" id="refNombre" placeholder="Nombre Completo *" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="refDni" placeholder="DNI / Identificación">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="refContacto" placeholder="Teléfono / Contacto">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-success w-100"><i class="fas fa-save"></i> Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-striped align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Nombre</th>
+                        <th>DNI</th>
+                        <th>Contacto</th>
+                        <th class="text-end pe-4">Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaReferentesBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>

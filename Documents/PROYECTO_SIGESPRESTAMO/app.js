@@ -13,6 +13,7 @@ import { inicializarLogicaCaja } from "./caja.js";
 import { inicializarLogicaUsuarios } from "./usuarios.js";
 import { inicializarLogicaMora } from "./mora.js";
 import { inicializarLogicaConfig } from "./configuracion.js";
+import { inicializarLogicaReferentes } from "./referentes.js";
 
 const btnLogin = document.getElementById("btnLogin");
 const btnLogout = document.getElementById("btnLogout");
@@ -202,6 +203,12 @@ window.cargarPagina = async function(pagina) {
                 contentArea.innerHTML = htmlConf;
                 inicializarLogicaConfig();
                 break;
+
+            case 'referentes':
+                const htmlRef = await (await fetch('referentes.html')).text();
+                contentArea.innerHTML = htmlRef;
+                inicializarLogicaReferentes();
+                break;  
 
             default:
                 contentArea.innerHTML = "<h1>Página no encontrada</h1>";

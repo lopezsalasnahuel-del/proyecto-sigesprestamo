@@ -1,29 +1,21 @@
-// 1. Importamos TU base de datos desde tu archivo de configuración
 import { db } from "./firebaseconfig.js";
 import { mostrarExito, mostrarError, confirmarAccion } from "./ui.js";
-
-// 2. Importamos las herramientas DESDE LA LIBRERÍA OFICIAL
-// Nota: Agregué 'collection', 'getDocs', 'deleteDoc', 'updateDoc' que necesitamos para la tabla y editar
 import { 
     doc, 
     setDoc, 
     getDoc, 
     collection, 
     getDocs, 
-    deleteDoc, 
-    updateDoc 
+    deleteDoc 
 } from "firebase/firestore"; 
 
-// Variable global para cachear los clientes y no gastar lecturas
+// Variable global para cachear los clientes
 let clientesCache = [];
 
 export async function inicializarLogicaClientes() {
     console.log("Inicializando lógica de Clientes...");
-
-    // 1. Cargar la tabla al iniciar
     await cargarTablaClientes();
-
-    // 2. Evento del Buscador
+    cargarListaReferentes();    
     const buscador = document.getElementById("buscadorCliente");
     if(buscador){
         buscador.addEventListener("input", (e) => {
@@ -31,13 +23,11 @@ export async function inicializarLogicaClientes() {
         });
     }
 
-    // 3. Evento del Formulario (Crear/Editar)
     const form = document.getElementById("formNuevoCliente");
     if (form) {
         form.addEventListener("submit", manejarGuardado);
     }
 
-    // Exponer funciones al HTML globalmente (necesario para los botones onclick)
     window.mostrarFormulario = mostrarFormulario;
     window.mostrarLista = mostrarLista;
     window.editarCliente = editarCliente;
@@ -45,7 +35,7 @@ export async function inicializarLogicaClientes() {
 }
 
 // ==========================================
-// FUNCIONES DE UI (MOSTRAR / OCULTAR)
+// FUNCIONES DE UI
 // ==========================================
 function mostrarFormulario(limpiar = true) {
     document.getElementById("seccionLista").style.display = "none";
@@ -55,7 +45,11 @@ function mostrarFormulario(limpiar = true) {
         document.getElementById("formNuevoCliente").reset();
         document.getElementById("tituloFormulario").innerText = "Nuevo Cliente";
         document.getElementById("esEdicion").value = "false";
-        document.getElementById("cliDni").disabled = false; // Habilitar DNI si es nuevo
+        document.getElementById("cliDni").disabled = false;
+        
+        // Por defecto al crear es activo
+        document.getElementById("cliEstado").value = "activo";
+        document.getElementById("estadoOriginal").value = "activo";
     }
 }
 
@@ -65,20 +59,19 @@ function mostrarLista() {
 }
 
 // ==========================================
-// CRUD: LEER (READ) - Cargar Tabla
+// CRUD: LEER (TABLA)
 // ==========================================
 async function cargarTablaClientes() {
     const tbody = document.getElementById("tablaClientesBody");
-    if(!tbody) return; // Seguridad si no cargó el HTML aún
-    
+    if(!tbody) return;
     tbody.innerHTML = '<tr><td colspan="6" class="text-center p-3"><div class="spinner-border text-primary"></div></td></tr>';
 
     try {
-        // Usamos 'collection' y 'getDocs' importados correctamente arriba
         const querySnapshot = await getDocs(collection(db, "clientes"));
-        clientesCache = []; // Limpiamos cache
+        clientesCache = [];
 
         querySnapshot.forEach((doc) => {
+            // Guardamos la data tal cual viene de Firebase
             clientesCache.push(doc.data());
         });
 
@@ -100,12 +93,23 @@ function renderizarTabla(lista) {
     }
 
     lista.forEach(c => {
-        // Validación segura para evitar errores si falta algún dato
         const contacto = c.contacto || {};
         const laboral = c.laboral || {};
+
+        // --- CORRECCIÓN DE ESTADO ---
+        // Verificamos exactamente qué valor tiene
+        const estado = c.estado || "activo"; 
         
+        let badgeEstado = '<span class="badge bg-success">Activo</span>';
+        let claseFila = '';
+
+        if (estado === 'no_apto') {
+            badgeEstado = '<span class="badge bg-danger"><i class="fas fa-ban me-1"></i> NO APTO</span>';
+            claseFila = 'table-danger opacity-75'; // Fila rojiza para destacar
+        }
+
         const fila = `
-            <tr>
+            <tr class="${claseFila}">
                 <td class="ps-4">
                     <div class="fw-bold text-dark">${c.nombreCompleto}</div>
                     <div class="small text-muted">${contacto.email || '-'}</div>
@@ -117,9 +121,8 @@ function renderizarTabla(lista) {
                 </td>
                 <td class="small">
                     <div><i class="fab fa-whatsapp text-success me-1"></i>${contacto.telefono || '-'}</div>
-                    <div class="text-truncate" style="max-width: 150px;">${contacto.direccion || '-'}</div>
                 </td>
-                <td><span class="badge bg-success bg-opacity-10 text-success">Activo</span></td>
+                <td>${badgeEstado}</td>
                 <td class="text-end pe-4">
                     <button class="btn btn-sm btn-link text-primary" onclick="editarCliente('${c.dni}')" title="Editar">
                         <i class="fas fa-pencil-alt"></i>
@@ -138,7 +141,7 @@ function filtrarTabla(texto) {
     const textoBuscado = texto.toLowerCase();
     const filtrados = clientesCache.filter(c => 
         (c.nombreCompleto && c.nombreCompleto.toLowerCase().includes(textoBuscado)) || 
-        (c.dni && c.dni.includes(textoBuscado))
+        (c.dni && c.dni.toString().includes(textoBuscado))
     );
     renderizarTabla(filtrados);
 }
@@ -159,9 +162,28 @@ async function manejarGuardado(e) {
     try {
         if(!dni) throw new Error("El DNI es obligatorio");
 
+        // Captura de valores de estado
+        const nuevoEstado = document.getElementById("cliEstado").value;
+        const estadoAnterior = document.getElementById("estadoOriginal").value;
+        
+        // DEBUG: Verificamos en consola qué está pasando
+        console.log(`Guardando... Rol: ${window.USER_ROLE} | Anterior: ${estadoAnterior} | Nuevo: ${nuevoEstado}`);
+
+        // --- VALIDACIÓN DE SEGURIDAD ---
+        if (esEdicion) {
+            // Si el cliente ERA 'no_apto' y ahora quieren ponerlo 'activo'
+            if (estadoAnterior === 'no_apto' && nuevoEstado === 'activo') {
+                if (window.USER_ROLE !== 'admin') {
+                    throw new Error("⛔ ACCESO DENEGADO: Solo un Administrador puede rehabilitar un cliente 'No Apto'.");
+                }
+            }
+        }
+
         const datosCliente = {
             dni: dni,
             nombreCompleto: document.getElementById("cliNombre").value.trim().toUpperCase(),
+            estado: nuevoEstado, // <--- Importante: Guardamos el estado explícitamente
+            referente: document.getElementById("cliReferente").value, // <--- NUEVO CAMPO
             contacto: {
                 telefono: document.getElementById("cliTelefono").value.trim(),
                 email: document.getElementById("cliEmail").value.trim(),
@@ -178,20 +200,23 @@ async function manejarGuardado(e) {
                 cbu: document.getElementById("cliCbu").value.trim(),
                 alias: document.getElementById("cliAlias").value.trim(),
             },
-            // Generamos las keywords para buscar fácil
             keywords: generarKeywords(dni, document.getElementById("cliNombre").value)
         };
 
-        // Referencia al documento
         const docRef = doc(db, "clientes", dni);
 
         if (!esEdicion) {
-            // ... validación de existencia ...
+            // Crear nuevo
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) throw new Error("El DNI ya existe.");
+            
+            datosCliente.fechaAlta = new Date().toISOString();
             await setDoc(docRef, datosCliente);
-            mostrarExito("Cliente registrado exitosamente"); // <--- CAMBIO
+            mostrarExito("Cliente creado correctamente");
         } else {
+            // Actualizar existente
             await setDoc(docRef, datosCliente, { merge: true });
-            mostrarExito("Cliente actualizado correctamente"); // <--- CAMBIO
+            mostrarExito("Cliente actualizado correctamente");
         }
 
         mostrarLista();
@@ -199,7 +224,7 @@ async function manejarGuardado(e) {
 
     } catch (error) {
         console.error(error);
-        mostrarError("No se pudo guardar: " + error.message); // <--- CAMBIO
+        mostrarError(error.message);
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -210,29 +235,36 @@ async function manejarGuardado(e) {
 // CRUD: EDITAR Y BORRAR
 // ==========================================
 async function editarCliente(dni) {
-    // Buscar en cache primero
-    let cliente = clientesCache.find(c => c.dni == dni); // == por si es string/number
+    let cliente = clientesCache.find(c => c.dni == dni);
     
-    // Si no está en caché (raro), buscamos en DB
     if (!cliente) {
         const docSnap = await getDoc(doc(db, "clientes", dni));
         if(docSnap.exists()) cliente = docSnap.data();
     }
 
-    if (!cliente) return alert("Error al cargar datos del cliente");
+    if (!cliente) return mostrarError("Error al cargar datos del cliente");
 
-    mostrarFormulario(false); // false = no limpiar formulario
+    if (document.getElementById("cliReferente")) {
+        document.getElementById("cliReferente").value = cliente.referente || "";
+    }
+
+    mostrarFormulario(false);
     
-    // Llenar campos
     document.getElementById("tituloFormulario").innerText = "Editar Cliente";
     document.getElementById("esEdicion").value = "true";
     
     document.getElementById("cliDni").value = cliente.dni;
-    document.getElementById("cliDni").disabled = true; // Bloquear DNI
+    document.getElementById("cliDni").disabled = true;
 
     document.getElementById("cliNombre").value = cliente.nombreCompleto || "";
     
-    // Usamos ?. por seguridad si falta algún sub-objeto
+    const estadoActual = cliente.estado || "activo";
+    
+    document.getElementById("cliEstado").value = estadoActual;
+    document.getElementById("estadoOriginal").value = estadoActual;
+    
+    console.log(`Editando cliente: ${cliente.nombreCompleto}. Estado detectado: ${estadoActual}`);
+
     document.getElementById("cliTelefono").value = cliente.contacto?.telefono || "";
     document.getElementById("cliEmail").value = cliente.contacto?.email || "";
     document.getElementById("cliDireccion").value = cliente.contacto?.direccion || "";
@@ -257,26 +289,22 @@ async function eliminarCliente(dni) {
 
     try {
         await deleteDoc(doc(db, "clientes", dni));
-        mostrarExito("Cliente eliminado correctamente."); // Alerta bonita
+        mostrarExito("Cliente eliminado correctamente.");
         cargarTablaClientes();
     } catch (error) {
         mostrarError(error.message);
     }
 }
 
-// Auxiliar para búsqueda
 function generarKeywords(dni, nombre) {
     const arr = [];
     let curDni = '';
-    // Keywords DNI
     if(dni){
         dni.toString().split('').forEach(letra => {
             curDni += letra;
             arr.push(curDni);
         });
     }
-    
-    // Keywords Nombre
     if(nombre){
         const palabras = nombre.split(' ');
         palabras.forEach(palabra => {
@@ -288,4 +316,64 @@ function generarKeywords(dni, nombre) {
         });
     }
     return arr;
+}
+
+// Función para llenar las sugerencias con los empleados
+// Función Híbrida: Carga Usuarios + Clientes + Referentes Externos
+async function cargarListaReferentes() {
+    const select = document.getElementById("cliReferente");
+    if (!select) return;
+
+    try {
+        select.innerHTML = '<option value="">Cargando...</option>';
+        
+        // 1. Ejecutamos las 3 consultas en paralelo para que sea rápido
+        const [snapUsuarios, snapClientes, snapReferentes] = await Promise.all([
+            getDocs(collection(db, "usuarios")),   // Prestamistas
+            getDocs(collection(db, "clientes")),   // Otros clientes
+            getDocs(collection(db, "referentes"))  // Los externos nuevos
+        ]);
+
+        select.innerHTML = '<option value="">Seleccione un referente...</option>';
+
+        // 2. Grupo A: PRESTAMISTAS (Usuarios)
+        const grupoUsuarios = document.createElement("optgroup");
+        grupoUsuarios.label = "--- PRESTAMISTAS / EMPLEADOS ---";
+        snapUsuarios.forEach(doc => {
+            const d = doc.data();
+            const opt = document.createElement("option");
+            opt.value = d.nombre; // Guardamos el nombre
+            opt.innerText = `${d.nombre} (Zona: ${d.zona || '-'})`;
+            grupoUsuarios.appendChild(opt);
+        });
+        select.appendChild(grupoUsuarios);
+
+        // 3. Grupo B: REFERENTES EXTERNOS
+        const grupoRef = document.createElement("optgroup");
+        grupoRef.label = "--- REFERENTES EXTERNOS ---";
+        snapReferentes.forEach(doc => {
+            const d = doc.data();
+            const opt = document.createElement("option");
+            opt.value = d.nombre;
+            opt.innerText = `${d.nombre} (Externo)`;
+            grupoRef.appendChild(opt);
+        });
+        select.appendChild(grupoRef);
+
+        // 4. Grupo C: CLIENTES (Por si un cliente trae a otro)
+        const grupoClientes = document.createElement("optgroup");
+        grupoClientes.label = "--- CLIENTES EXISTENTES ---";
+        snapClientes.forEach(doc => {
+            const d = doc.data();
+            const opt = document.createElement("option");
+            opt.value = d.nombreCompleto;
+            opt.innerText = d.nombreCompleto;
+            grupoClientes.appendChild(opt);
+        });
+        select.appendChild(grupoClientes);
+
+    } catch (error) {
+        console.error("Error cargando lista mixta:", error);
+        select.innerHTML = '<option value="">Error al cargar lista</option>';
+    }
 }

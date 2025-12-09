@@ -66,6 +66,7 @@
 
                     <!-- SECCIÓN 1: DATOS PERSONALES -->
                     <h5 class="text-muted mb-3 fs-6 fw-bold text-uppercase">Datos Personales</h5>
+                    <input type="hidden" id="estadoOriginal" value="">
                     <div class="row g-3 mb-4">
                         <div class="col-md-2">
                             <label class="form-label small">DNI *</label>
@@ -80,12 +81,26 @@
                             <input type="text" class="form-control" id="cliTelefono">
                         </div>
                         <div class="col-md-3">
+                            <label class="form-label small">Estado del Cliente</label>
+                            <select class="form-select fw-bold" id="cliEstado">
+                                <option value="activo" class="text-success">✅ Activo</option>
+                                <option value="no_apto" class="text-danger">⛔ No Apto</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label small">Email</label>
                             <input type="email" class="form-control" id="cliEmail">
                         </div>
                         <div class="col-md-12">
                             <label class="form-label small">Dirección</label>
                             <input type="text" class="form-control" id="cliDireccion">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Referente / Responsable</label>
+                            <!-- VOLVEMOS AL SELECT -->
+                            <select class="form-select" id="cliReferente">
+                                <option value="">Cargando lista combinada...</option>
+                            </select>
                         </div>
                     </div>
 

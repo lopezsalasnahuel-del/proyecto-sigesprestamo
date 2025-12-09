@@ -1,4 +1,3 @@
-<!-- prestamos.html -->
 <div class="container-fluid animate-fade-in">
 
     <!-- VISTA 1: LISTADO DE PRÉSTAMOS ACTIVOS -->
@@ -71,17 +70,33 @@
                         <h5 class="card-title text-muted mb-3">2. Condiciones</h5>
                         <form id="formSimularPrestamo">
                             <div class="mb-3">
+                                <label class="form-label small">Moneda del Préstamo</label>
+                                <div class="row g-2">
+                                    <div class="col-7">
+                                        <select class="form-select fw-bold" id="presMoneda" onchange="togglePresMoneda()">
+                                            <option value="ARS" selected>🇦🇷 Pesos (ARS)</option>
+                                            <option value="USD">🇺🇸 Dólares (USD)</option>
+                                            <option value="EUR">🇪🇺 Euros (EUR)</option>
+                                            <option value="OTRO" class="text-primary fw-bold">✏️ OTRA...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-5">
+                                        <input type="text" class="form-control" id="presMonedaCustom" placeholder="Nombre..." style="display: none;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
                                 <label class="form-label small">Monto a Entregar ($)</label>
                                 <input type="number" class="form-control" id="presMonto" required>
                             </div>
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
                                     <label class="form-label small">Interés Total (%)</label>
-                                    <input type="number" class="form-control" id="presTasa" value="">
+                                    <input type="number" class="form-control" id="presTasa">
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label small">Cuotas</label>
-                                    <input type="number" class="form-control" id="presCuotas" value="">
+                                    <input type="number" class="form-control" id="presCuotas">
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -151,16 +166,28 @@
             </div>
         </div>
     </div>
+
     <!-- VISTA 3: DETALLE DEL PRÉSTAMO Y COBRANZA -->
     <div id="seccionDetallePrestamo" style="display: none;">
+        
+        <!-- CABECERA DE GESTIÓN -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="text-primary m-0"><i class="fas fa-money-bill-wave me-2"></i>Gestión de Cobranza</h3>
-            <button class="btn btn-outline-secondary btn-sm" onclick="mostrarListaPrestamos()">
-                <i class="fas fa-arrow-left me-2"></i>Volver al Listado
-            </button>
+            <h3 class="text-primary m-0"><i class="fas fa-file-contract me-2"></i>Gestión de Crédito</h3>
+            <div>
+                <!-- BOTONES DE ACCIÓN RÁPIDA -->
+                <button class="btn btn-success me-2" onclick="abrirModalPagoFlexible()">
+                    <i class="fas fa-hand-holding-usd me-2"></i>Pago Flexible
+                </button>
+                <button class="btn btn-warning me-2 text-dark" onclick="abrirModalRefinanciar()">
+                    <i class="fas fa-sync-alt me-2"></i>Refinanciar
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="mostrarListaPrestamos()">
+                    <i class="fas fa-arrow-left me-2"></i>Volver
+                </button>
+            </div>
         </div>
 
-        <!-- 1. Cabecera con Resumen del Préstamo -->
+        <!-- 1. TARJETA AZUL RESUMEN -->
         <div class="card bg-primary text-white shadow-sm mb-4">
             <div class="card-body">
                 <div class="row align-items-center">
@@ -185,7 +212,7 @@
             </div>
         </div>
 
-        <!-- 2. Tabla de Cuotas -->
+        <!-- 2. TABLA DE CUOTAS -->
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white py-3">
                 <h5 class="m-0 text-muted"><i class="fas fa-list-ol me-2"></i>Listado de Cuotas</h5>
@@ -213,5 +240,91 @@
 
         <!-- Input oculto para saber qué préstamo estamos mirando -->
         <input type="hidden" id="idPrestamoActivo">
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- MODALES (FUERA DE LOS CONTENEDORES DE VISTA) -->
+<!-- ============================================== -->
+
+<!-- MODAL PAGO FLEXIBLE -->
+<div class="modal fade" id="modalPagoFlexible" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Pago a Cuenta / Flexible</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>El cliente entrega un monto global. El sistema cubrirá las cuotas más antiguas automáticamente y reducirá el saldo de la siguiente.</p>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Monto que entrega el cliente:</label>
+                    <input type="number" class="form-control form-control-lg" id="montoFlexible" placeholder="$0.00">
+                </div>
+                <div class="alert alert-info small">
+                    <i class="fas fa-info-circle"></i> Esto registrará un ingreso en Caja.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="procesarPagoFlexible()">Confirmar Pago</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL REFINANCIAR -->
+<div class="modal fade" id="modalRefinanciar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title text-dark">Refinanciar Deuda</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <strong>Atención:</strong> Esta acción cancelará el préstamo actual y creará uno nuevo con el saldo pendiente.
+                </div>
+                
+                <h6 class="border-bottom pb-2">Datos del Nuevo Plan</h6>
+                
+                <div class="mb-3 row">
+                    <div class="col-6">
+                        <label class="form-label small">Deuda Actual (Capital)</label>
+                        <input type="text" class="form-control" id="refinSaldoBase" disabled>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small">Nueva Tasa (%)</label>
+                        <input type="number" class="form-control" id="refinTasa" value="10">
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <div class="col-6">
+                        <label class="form-label small">Nuevas Cuotas</label>
+                        <input type="number" class="form-control" id="refinCuotas" value="6">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small">Frecuencia</label>
+                        <select class="form-select" id="refinFrecuencia">
+                            <option value="Mensual">Mensual</option>
+                            <option value="Quincenal">Quincenal</option>
+                            <option value="Semanal">Semanal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <small>Nueva Deuda Total</small>
+                        <h3 class="fw-bold text-dark" id="refinNuevoTotal">$0.00</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning fw-bold" onclick="confirmarRefinanciacion()">Aplicar Refinanciación</button>
+            </div>
+        </div>
     </div>
 </div>

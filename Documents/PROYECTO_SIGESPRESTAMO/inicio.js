@@ -1,96 +1,183 @@
 import { db } from "./firebaseconfig.js";
-// Quitamos getCountFromServer que no estabas usando para evitar errores
 import { collection, getDocs, query, where } from "firebase/firestore"; 
 
 export function inicializarLogicaInicio() {
-    console.log("Dashboard Iniciado - V2");
-    cargarEstadisticas();
+    console.log("Dashboard Iniciado - V4 (Proyección Mensual Incluida)");
+    cargarEstadisticasYGraficos();
 }
 
-async function cargarEstadisticas() {
+async function cargarEstadisticasYGraficos() {
     try {
-        console.log("1. Cargando Clientes...");
+        // ============================================================
+        // 1. CARGA DE KPIs (Tarjetas)
+        // ============================================================
+        
+        // --- Clientes ---
         const snapClientes = await getDocs(collection(db, "clientes"));
-        const totalClientes = snapClientes.size;
+        if(document.getElementById("dashTotalClientes")) 
+            document.getElementById("dashTotalClientes").innerText = snapClientes.size;
+
+        // --- Préstamos Activos ---
+        const qPrestamosActivos = query(collection(db, "prestamos"), where("estado", "==", "activo"));
+        const snapPrestamosActivos = await getDocs(qPrestamosActivos);
         
-        // Verificamos que el elemento exista antes de escribir para evitar errores
-        if(document.getElementById("dashTotalClientes")) {
-            document.getElementById("dashTotalClientes").innerText = totalClientes;
-        }
+        if(document.getElementById("dashTotalPrestamos"))
+            document.getElementById("dashTotalPrestamos").innerText = snapPrestamosActivos.size;
 
-        console.log("2. Cargando Préstamos Activos...");
-        const qPrestamos = query(collection(db, "prestamos"), where("estado", "==", "activo"));
-        const snapPrestamos = await getDocs(qPrestamos);
-        const totalPrestamos = snapPrestamos.size;
-
-        if(document.getElementById("dashTotalPrestamos")) {
-            document.getElementById("dashTotalPrestamos").innerText = totalPrestamos;
-        }
-
-        console.log("3. Calculando Caja...");
-        const hoy = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
-        const qCaja = query(collection(db, "transacciones"), where("fechaCorta", "==", hoy));
-        const snapCaja = await getDocs(qCaja);
-        
-        let ingresos = 0;
-        let egresos = 0;
-        snapCaja.forEach(doc => {
-            const t = doc.data();
-            if (t.tipo === "INGRESO") ingresos += t.monto;
-            if (t.tipo === "EGRESO") egresos += t.monto;
+        // --- Caja Hoy ---
+        const hoy = new Date().toLocaleDateString('en-CA');
+        const qCajaHoy = query(collection(db, "transacciones"), where("fechaCorta", "==", hoy));
+        const snapCaja = await getDocs(qCajaHoy);
+        let balanceHoy = 0;
+        snapCaja.forEach(d => {
+            const t = d.data();
+            balanceHoy += (t.tipo === "INGRESO" ? t.monto : -t.monto);
         });
-        const balance = ingresos - egresos;
-        
-        if(document.getElementById("dashBalanceHoy")) {
-            document.getElementById("dashBalanceHoy").innerText = `$${balance}`;
-        }
+        if(document.getElementById("dashBalanceHoy"))
+            document.getElementById("dashBalanceHoy").innerText = `$${balanceHoy.toFixed(0)}`;
 
-        console.log("4. Calculando Mora (Estimación)...");
-        // SOLUCIÓN: Hacemos lo mismo que en mora.js (Filtro en cliente)
+        // ============================================================
+        // 2. CÁLCULOS COMPLEJOS (Mora + Proyección + Gráfico Dona)
+        // ============================================================
+        
+        // Variables para Mora y Proyección
         let contadorMora = 0;
+        let totalProyeccionMes = 0; // <--- NUEVA VARIABLE
+
+        // Fechas de referencia
+        const ahora = new Date();
+        const mesActual = ahora.getMonth(); // 0 = Enero
+        const anioActual = ahora.getFullYear();
+        const startOfToday = new Date(); 
+        startOfToday.setHours(0,0,0,0);
         
-        // Fecha de hoy (Medianoche)
-        const startOfToday = new Date();
-        startOfToday.setHours(0, 0, 0, 0);
-        
-        const promises = [];
-        
-        // Recorremos los préstamos activos que ya bajamos en el paso 2
-        snapPrestamos.forEach(doc => {
-            // AQUI ESTA EL CAMBIO: Solo pedimos 'pendiente' a Firebase.
-            // Quitamos el filtro de fecha de la consulta para evitar error de índice.
-            const qCuotas = query(
-                collection(db, "prestamos", doc.id, "cuotas"), 
-                where("estado", "==", "pendiente")
-            );
-            promises.push(getDocs(qCuotas));
+        // --- PREPARACIÓN GRÁFICO DONA (Activos + Finalizados) ---
+        const qTodosPrestamos = query(collection(db, "prestamos"), where("estado", "in", ["activo", "finalizado"]));
+        const snapTodos = await getDocs(qTodosPrestamos);
+
+        let totalPrestadoHistorico = 0;
+        let totalPendienteActual = 0;
+
+        snapTodos.forEach(doc => {
+            const data = doc.data();
+            totalPrestadoHistorico += (data.totalADevolver || 0);
+            totalPendienteActual += (data.saldoPendiente || 0);
         });
 
-        // Esperamos todas las respuestas
-        const resultadosCuotas = await Promise.all(promises);
+        // --- RECORRIDO DE CUOTAS (Optimizado: Mora + Proyección en un solo viaje) ---
+        const promisesCuotas = [];
         
-        // Contamos manualmente en JS
+        // Solo miramos cuotas de préstamos ACTIVOS
+        snapPrestamosActivos.forEach(doc => {
+            const qCuotas = query(collection(db, "prestamos", doc.id, "cuotas"), where("estado", "==", "pendiente"));
+            promisesCuotas.push(getDocs(qCuotas));
+        });
+
+        const resultadosCuotas = await Promise.all(promisesCuotas);
+        
         resultadosCuotas.forEach(snap => {
             snap.forEach(docCuota => {
                 const data = docCuota.data();
-                // Filtro de fecha en JavaScript (Infalible)
                 const fechaVencimiento = new Date(data.vencimiento);
-                
+
+                // A) Chequeo de Mora (Vencido antes de hoy)
                 if (fechaVencimiento < startOfToday) {
                     contadorMora++;
+                }
+
+                // B) Chequeo de Proyección (Vence este mes y año)
+                if (fechaVencimiento.getMonth() === mesActual && 
+                    fechaVencimiento.getFullYear() === anioActual) {
+                    totalProyeccionMes += (data.monto || 0);
                 }
             });
         });
 
-        if(document.getElementById("dashTotalMora")) {
+        // Escribir resultados en el HTML
+        if(document.getElementById("dashTotalMora"))
             document.getElementById("dashTotalMora").innerText = contadorMora;
-        }
+
+        if(document.getElementById("dashProyeccionMes"))
+            document.getElementById("dashProyeccionMes").innerText = `$${totalProyeccionMes.toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+
+
+        // ============================================================
+        // 3. RENDERIZADO DE GRÁFICOS (CHART.JS)
+        // ============================================================
+
+        // --- GRÁFICO A: ESTADO DE CARTERA (DONA) ---
+        const totalCobradoReal = totalPrestadoHistorico - totalPendienteActual;
         
-        console.log("Dashboard cargado correctamente.");
+        const canvasDona = document.getElementById('chartCartera');
+        // Destruir previo para evitar bugs visuales
+        if (Chart.getChart(canvasDona)) {
+            Chart.getChart(canvasDona).destroy();
+        }
+
+        if (canvasDona) {
+            new Chart(canvasDona, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Cobrado (Histórico)', 'Por Cobrar (Actual)'],
+                    datasets: [{
+                        data: [totalCobradoReal, totalPendienteActual],
+                        backgroundColor: ['#198754', '#dc3545'], 
+                        hoverOffset: 4
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // --- GRÁFICO B: INGRESOS MENSUALES (BARRAS) ---
+        const qIngresos = query(collection(db, "transacciones"), where("tipo", "==", "INGRESO"));
+        const snapIngresos = await getDocs(qIngresos);
+
+        const ingresosPorMes = {};
+        snapIngresos.forEach(doc => {
+            const t = doc.data();
+            const fechaStr = t.fechaCorta || t.fecha || "Sin Fecha";
+            const mes = fechaStr.substring(0, 7); // YYYY-MM
+            
+            if(!ingresosPorMes[mes]) ingresosPorMes[mes] = 0;
+            ingresosPorMes[mes] += t.monto;
+        });
+
+        const mesesOrdenados = Object.keys(ingresosPorMes).sort().slice(-6); // Últimos 6 meses
+        const montosOrdenados = mesesOrdenados.map(mes => ingresosPorMes[mes]);
+
+        const canvasBarras = document.getElementById('chartIngresos');
+        if (Chart.getChart(canvasBarras)) {
+            Chart.getChart(canvasBarras).destroy();
+        }
+
+        if (canvasBarras) {
+            new Chart(canvasBarras, {
+                type: 'bar',
+                data: {
+                    labels: mesesOrdenados,
+                    datasets: [{
+                        label: 'Ingresos ($)',
+                        data: montosOrdenados,
+                        backgroundColor: '#0d6efd',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
 
     } catch (error) {
-        console.error("Error cargando dashboard:", error);
-        // Poner guiones si falla algo visualmente
-        if(document.getElementById("dashTotalClientes")) document.getElementById("dashTotalClientes").innerText = "-";
+        console.error("Error cargando gráficos:", error);
     }
 }
